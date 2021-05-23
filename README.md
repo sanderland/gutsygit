@@ -2,11 +2,16 @@
 
 Makes git usage extremely fast by making some gutsy assumptions.
 
+### Assumptions:
+
+You work in a devopment environment based on pull request, avoiding pushing to your main branch. 
+Commit messages are not always very relevant due to squashing. Your .gitignore is set up well enough to routinely add all changes.
+
 ## Usage
 
 `gg <any number of single letter commands> [<arguments>]`
 
-## Commands:
+### Commands:
 
 * `b [<name>]`: Create a new branch from origin/main with generated or given name, stashing and applying uncommitted changes if needed. 
    * If the branch exists, adds a numeric suffix to the name.
@@ -28,11 +33,6 @@ Makes git usage extremely fast by making some gutsy assumptions.
 * `gg cp`: Commit and push changes with a generated commit message.
 * `gg bcp newbranch some description`: Create a new branch named "newbranch", commit, and push any changes that were not commited before this with the commit message "some description".
 * `gg Csl othertask`: Commit current changes regardless of commit hooks status, switch to 'othertask' branch and updates it.
-
-## Assumptions:
-
-You work in a devopment environment based on pull request, avoiding pushing to your main branch. 
-Commit messages are not always very relevant.
 
 ## Settings
 Settings are retrieved from `git config` with the `gutsygit.[setting]` key:
