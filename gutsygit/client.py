@@ -33,10 +33,13 @@ class Config:
 
     def update(self, git_config: str):
         for line in git_config.split("\n"):
-            line = line.strip()
-            if line:
-                k, v = line.split(" ", 1)
-                setattr(self, "_" + k, str(v))
+            try:
+                line = line.strip()
+                if line:
+                    k, v = line.split(" ", 1)
+                    setattr(self, "_" + k, str(v))
+            except ValueError:
+                pass
 
     # parse values
     @property
@@ -222,7 +225,9 @@ class GutsyGit:
             args = ["--verbose"]
             if remote is None:
                 args += ["--set-upstream", "origin", current]
-            self.header(f"Pushing local branch '{current}' to remote branch '{remote or current}'",)
+            self.header(
+                f"Pushing local branch '{current}' to remote branch '{remote or current}'",
+            )
             status, out, err = self.git("push", *args, with_extended_output=True)
             url = re.search(r"https?://\S+", out + err)
             if status == 0 and self.config.open_browser_for_pull_request and url:
