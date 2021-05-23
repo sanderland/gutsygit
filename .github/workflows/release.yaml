@@ -25,16 +25,13 @@ jobs:
     - name: Check codestyle
       run: |
         black --check .
-        isort --check-only -rc .
+        isort --check-only .
 
     - name: Run tests
       run: pytest -v tests
 
     - name: Build package
       run: poetry build
-
-    - name: Build docs
-      run: cd docs && make html
 
     - name: Release to PyPI
       env:
