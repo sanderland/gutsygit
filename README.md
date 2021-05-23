@@ -4,8 +4,12 @@ Makes git usage extremely fast by making some gutsy assumptions.
 
 ### Assumptions:
 
-You work in a devopment environment based on pull request, avoiding pushing to your main branch. 
+You work in a development environment based on pull request, avoiding pushing to your main branch. 
 Commit messages are not always very relevant due to squashing. Your .gitignore is set up well enough to routinely add all changes.
+
+## Installation
+
+`pip install gutsygit`
 
 ## Usage
 
@@ -25,13 +29,13 @@ Commit messages are not always very relevant due to squashing. Your .gitignore i
 * `p`: Push commits.
    * Potentially pulls from remote if needed.
    * Sets tracking for the remote branch with the same name on the first push. 
-   * Opens a web browser if an url is returned by git, as github does for pull requests.
+   * Opens a web browser if an url is returned by git, as GitHub does for pull requests.
 * `l`: Pull
 
 ## Examples
 
 * `gg cp`: Commit and push changes with a generated commit message.
-* `gg bcp newbranch some description`: Create a new branch named "newbranch", commit, and push any changes that were not commited before this with the commit message "some description".
+* `gg bcp newbranch some description`: Create a new branch named "newbranch", commit, and push any changes that were not committed before this with the commit message "some description".
 * `gg Csl othertask`: Commit current changes regardless of commit hooks status, switch to 'othertask' branch and updates it.
 
 ## Settings
