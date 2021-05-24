@@ -18,6 +18,8 @@ def run():
         exit(0)
 
     gg = GutsyGit()
+    if sys.argv[1]=='wp':
+        exit("Thanks for the game. Well played.")
     commands = list(sys.argv[1])
     args = sys.argv[2:]
 
@@ -26,21 +28,23 @@ def run():
         try:
             if cmd == "b":
                 gg.create_new_branch(branch_name=args.pop(0) if args else None)
-            if cmd == "s":
+            elif cmd == "s":
                 if not args:
                     gg.log("s(witch) command expects a branch name, but no arguments left")
                     return
                 gg.switch_branch(branch_name=args.pop(0))
-            if cmd in ["c", "C"]:
+            elif cmd in ["c", "C"]:
                 if args and "b" not in commands and "s" not in commands:
                     message = " ".join(args)
                 else:
                     message = gg.create_name_from_diff()
                 gg.add_and_commit(message=message, force=(cmd == "C"))
-            if cmd == "l":
+            elif cmd == "l":
                 gg.pull()
-            if cmd == "p":
+            elif cmd == "p":
                 gg.ensure_push(try_pull=True)
+            else:
+                exit(f"Unrecognized command '{cmd}'")
         except GitCommandError as e:
             gg.log(
                 f"!!! Fatal git error while executing '{cmd}':\n",
