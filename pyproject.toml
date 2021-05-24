@@ -6,7 +6,7 @@ authors = ["Sander Land"]
 license = "Apache-2.0"
 readme = "README.md"
 repository = "http://github.com/sanderland/gutsygit"
-keywords = "git, productivity, python"
+keywords = ["git", "productivity"]
 
 [tool.black]
 line-length = 120
