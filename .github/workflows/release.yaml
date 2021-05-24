@@ -20,7 +20,7 @@ jobs:
       run: |
         python3 -m pip install poetry
         poetry config virtualenvs.create false
-        poetry install --dev
+        poetry install
 
     - name: Check codestyle
       run: |
