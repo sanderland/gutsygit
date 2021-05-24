@@ -18,7 +18,7 @@ def run():
         exit(0)
 
     gg = GutsyGit()
-    if sys.argv[1]=='wp':
+    if sys.argv[1] == "wp":
         exit("Thanks for the game. Well played.")
     commands = list(sys.argv[1])
     args = sys.argv[2:]
