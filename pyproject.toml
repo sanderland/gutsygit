@@ -1,9 +1,12 @@
 [tool.poetry]
 name = "gutsygit"
-version = "0.5.1"
+version = "0.5.2"
 description = "Command-line tool for fast git usage"
 authors = ["Sander Land"]
 license = "Apache-2.0"
+readme = "README.md"
+repository = "http://github.com/sanderland/gutsygit"
+keywords = "git, productivity, python"
 
 [tool.black]
 line-length = 120
