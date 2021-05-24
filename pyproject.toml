@@ -3,6 +3,7 @@ name = "gutsygit"
 version = "0.5.1"
 description = "Command-line tool for fast git usage"
 authors = ["Sander Land"]
+license = "Apache-2.0"
 
 [tool.black]
 line-length = 120
