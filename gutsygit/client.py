@@ -235,7 +235,7 @@ class GutsyGit:
                 webbrowser.open(url[0])
 
         except GitCommandError as e:
-            if try_pull and "(fetch first)" in str(e):
+            if try_pull and ("(fetch first)" in str(e) or "git pull" in str(e)):
                 self.log(f">>> Push failed due to changes in remote, trying to pull", level=LEVEL_HEADER)
                 self.pull()
                 self.ensure_push(try_pull=False)
