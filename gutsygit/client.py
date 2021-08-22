@@ -28,7 +28,6 @@ OUTPUT_COLORS = {
 class Config:
     def __init__(self):  # all values are strings, since they can come from config
         self._protectedbranches = "main,master"
-        self._openbrowser = "1"
         self._outputlevel = f"{LEVEL_INFO}"
 
     def update(self, git_config: str):
@@ -40,11 +39,6 @@ class Config:
                     setattr(self, "_" + k, str(v))
             except ValueError:
                 pass
-
-    # parse values
-    @property
-    def open_browser_for_pull_request(self) -> bool:
-        return self._openbrowser.strip().lower() not in {"false", "0"}
 
     @property
     def protected_branches(self) -> List[str]:
@@ -218,7 +212,7 @@ class GutsyGit:
         else:
             self.log("Nothing to commit.")
 
-    def ensure_push(self, try_pull=True):
+    def ensure_push(self, try_pull=True, open_browser=False):
         current = self.current_branch()
         remote = self.current_branch(remote=True)
         try:
@@ -230,7 +224,7 @@ class GutsyGit:
             )
             status, out, err = self.git("push", *args, with_extended_output=True)
             url = re.search(r"https?://\S+", out + err)
-            if status == 0 and self.config.open_browser_for_pull_request and url:
+            if status == 0 and open_browser and url:
                 self.header(f"Opening {url[0]} in web browser")
                 webbrowser.open(url[0])
 
@@ -238,7 +232,7 @@ class GutsyGit:
             if try_pull and ("(fetch first)" in str(e) or "git pull" in str(e)):
                 self.log(f">>> Push failed due to changes in remote, trying to pull", level=LEVEL_HEADER)
                 self.pull()
-                self.ensure_push(try_pull=False)
+                self.ensure_push(try_pull=False,open_browser=open_browser)
             else:
                 raise
 
