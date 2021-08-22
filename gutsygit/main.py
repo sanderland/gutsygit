@@ -41,8 +41,8 @@ def run():
                 gg.add_and_commit(message=message, force=(cmd == "C"))
             elif cmd == "l":
                 gg.pull()
-            elif cmd == "p":
-                gg.ensure_push(try_pull=True)
+            elif cmd in ["p", "P"]:
+                gg.ensure_push(try_pull=True, open_browser=(cmd == "P"))
             else:
                 exit(f"Unrecognized command '{cmd}'")
         except GitCommandError as e:
