@@ -232,7 +232,7 @@ class GutsyGit:
             if try_pull and ("(fetch first)" in str(e) or "git pull" in str(e)):
                 self.log(f">>> Push failed due to changes in remote, trying to pull", level=LEVEL_HEADER)
                 self.pull()
-                self.ensure_push(try_pull=False,open_browser=open_browser)
+                self.ensure_push(try_pull=False, open_browser=open_browser)
             else:
                 raise
 
