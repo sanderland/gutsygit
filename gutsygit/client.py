@@ -2,6 +2,7 @@ import os
 import re
 import webbrowser
 from typing import overload, Literal
+from dataclasses import dataclass
 
 import colorama
 from git import Git, GitCommandError
@@ -21,6 +22,13 @@ OUTPUT_COLORS = {
     LEVEL_WARNING: colorama.Fore.RED,
     LEVEL_ERROR: colorama.Fore.RED,
 }
+
+
+@dataclass
+class GitResult:
+    exitcode: int
+    stdout: str
+    stderr: str
 
 
 class Config:
@@ -52,7 +60,7 @@ class GutsyGit:
         self.git_cmd = Git()
         self.config = Config()
         try:
-            self.config.update(self.git("config", "--get-regexp", "gutsygit.*", quiet=True))
+            self.config.update(self.git("config", "--get-regexp", "gutsygit.*", quiet=True).stdout)
         except GitCommandError as e:
             if e.stdout or e.stderr:
                 self.log(f"Failed to get git config: {e}", level=LEVEL_ERROR)
@@ -64,43 +72,16 @@ class GutsyGit:
     def header(self, message):
         self.log(">>> ", message, level=LEVEL_HEADER)
 
-    @overload
     def git(
         self,
         command,
         *args,
-        with_extended_output: Literal[True],
         with_exceptions=True,
         stdout_log_level=LEVEL_INFO,
         stderr_log_level=LEVEL_INFO,
         quiet=False,
         **kwargs,
-    ) -> tuple[int, str, str]: ...
-
-    @overload
-    def git(
-        self,
-        command,
-        *args,
-        with_extended_output: Literal[False] = False,
-        with_exceptions=True,
-        stdout_log_level=LEVEL_INFO,
-        stderr_log_level=LEVEL_INFO,
-        quiet=False,
-        **kwargs,
-    ) -> str: ...
-
-    def git(
-        self,
-        command,
-        *args,
-        with_extended_output=False,
-        with_exceptions=True,
-        stdout_log_level=LEVEL_INFO,
-        stderr_log_level=LEVEL_INFO,
-        quiet=False,
-        **kwargs,
-    ) -> str | tuple[int, str, str]:
+    ) -> GitResult:
         exitcode, stdout, stderr = getattr(self.git_cmd, command)(
             *args, **kwargs, with_extended_output=True, with_exceptions=with_exceptions
         )
@@ -110,18 +91,15 @@ class GutsyGit:
         elif not quiet:
             self.log(stdout, level=LEVEL_ERROR)
             self.log(stderr, level=LEVEL_ERROR)
-        if with_extended_output:
-            return exitcode, stdout, stderr
-        else:
-            return stdout + stderr
+        return GitResult(exitcode, stdout, stderr)
 
     # branch functions
 
     def current_branch(self, remote=False) -> str | None:
-        current = self.git("branch", show_current=True, quiet=True)
+        current = self.git("branch", show_current=True, quiet=True).stdout
         if remote:
             try:
-                remote_head = self.git("config", f"branch.{current}.merge", quiet=True).strip()
+                remote_head = self.git("config", f"branch.{current}.merge", quiet=True).stdout.strip()
             except GitCommandError:  # exit code 1
                 return None
             return remote_head.removeprefix("refs/heads/")
@@ -129,7 +107,7 @@ class GutsyGit:
             return current
 
     def all_branches(self, remote=False) -> list[str]:
-        return [b.strip(" *") for b in self.git("branch", remotes=remote, quiet=True).split("\n")]
+        return [b.strip(" *") for b in self.git("branch", remotes=remote, quiet=True).stdout.split("\n")]
 
     def main_branch_names(self, remote=False) -> list[str]:
         remote_branches = set(self.all_branches(remote=remote))
@@ -143,10 +121,10 @@ class GutsyGit:
     def create_branch(self, name):
         if name is None:
             name = self.create_name_from_diff(for_branch=True)
-        return self.git("checkout", b=name, quiet=True)
+        self.git("checkout", b=name, quiet=True)
 
     def is_dirty(self) -> bool:
-        return self.git("status", porcelain=True, quiet=True, with_extended_output=True)[1].strip() != ""
+        return self.git("status", porcelain=True, quiet=True).stdout.strip() != ""
 
     def ensure_branch(self):
         if self.on_protected_branch():
@@ -158,7 +136,7 @@ class GutsyGit:
 
     # file adding
     def add_files(self, include_new_files):
-        return self.git("add", "--all" if include_new_files else "")
+        self.git("add", "--all" if include_new_files else "")
 
     # diff functions
     def diff_stats(self):
@@ -173,7 +151,7 @@ class GutsyGit:
         return sorted(
             [
                 parse_line(line)
-                for line in self.git("diff", "HEAD", numstat=True, quiet=True).strip().split("\n")
+                for line in self.git("diff", "HEAD", numstat=True, quiet=True).stdout.strip().split("\n")
                 if line
             ],
             key=lambda info: -(info[0] + info[1]),
@@ -223,14 +201,13 @@ class GutsyGit:
                 if retry == 1 and not self.is_dirty():
                     self.log("Nothing to commit on retry.")
                     return
-                code, out, err = self.git(
+                result = self.git(
                     "commit",
                     m=message,
-                    with_extended_output=True,
                     with_exceptions=(retry == 1),
                     no_verify=(retry == 1 and force),
                 )
-                if code == 0:
+                if result.exitcode == 0:
                     break
         else:
             self.log("Nothing to commit.")
@@ -245,9 +222,9 @@ class GutsyGit:
             self.header(
                 f"Pushing local branch '{current}' to remote branch '{remote or current}'",
             )
-            status, out, err = self.git("push", *args, with_extended_output=True)
-            url = re.search(r"https?://\S+", out + err)
-            if status == 0 and open_browser and url:
+            result = self.git("push", *args)
+            url = re.search(r"https?://\S+", result.stdout + result.stderr)
+            if result.exitcode == 0 and open_browser and url:
                 self.header(f"Opening {url[0]} in web browser")
                 webbrowser.open(url[0])
 
