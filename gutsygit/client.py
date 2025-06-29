@@ -1,12 +1,10 @@
 import os
 import re
 import webbrowser
-from typing import List, Optional, Tuple, Union
+from typing import overload, Literal
 
 import colorama
 from git import Git, GitCommandError
-
-from gutsygit.utils import removeprefix
 
 colorama.init(autoreset=True)
 
@@ -41,7 +39,7 @@ class Config:
                 pass
 
     @property
-    def protected_branches(self) -> List[str]:
+    def protected_branches(self) -> list[str]:
         return [b.strip() for b in self._protectedbranches.split(",")]
 
     @property
@@ -66,6 +64,32 @@ class GutsyGit:
     def header(self, message):
         self.log(">>> ", message, level=LEVEL_HEADER)
 
+    @overload
+    def git(
+        self,
+        command,
+        *args,
+        with_extended_output: Literal[True],
+        with_exceptions=True,
+        stdout_log_level=LEVEL_INFO,
+        stderr_log_level=LEVEL_INFO,
+        quiet=False,
+        **kwargs,
+    ) -> tuple[int, str, str]: ...
+
+    @overload
+    def git(
+        self,
+        command,
+        *args,
+        with_extended_output: Literal[False] = False,
+        with_exceptions=True,
+        stdout_log_level=LEVEL_INFO,
+        stderr_log_level=LEVEL_INFO,
+        quiet=False,
+        **kwargs,
+    ) -> str: ...
+
     def git(
         self,
         command,
@@ -76,7 +100,7 @@ class GutsyGit:
         stderr_log_level=LEVEL_INFO,
         quiet=False,
         **kwargs,
-    ) -> Union[str, Tuple[int, str, str]]:
+    ) -> str | tuple[int, str, str]:
         exitcode, stdout, stderr = getattr(self.git_cmd, command)(
             *args, **kwargs, with_extended_output=True, with_exceptions=with_exceptions
         )
@@ -93,21 +117,21 @@ class GutsyGit:
 
     # branch functions
 
-    def current_branch(self, remote=False) -> Optional[str]:
+    def current_branch(self, remote=False) -> str | None:
         current = self.git("branch", show_current=True, quiet=True)
         if remote:
             try:
                 remote_head = self.git("config", f"branch.{current}.merge", quiet=True).strip()
             except GitCommandError:  # exit code 1
                 return None
-            return removeprefix(remote_head, "refs/heads/")
+            return remote_head.removeprefix("refs/heads/")
         else:
             return current
 
-    def all_branches(self, remote=False) -> List[str]:
+    def all_branches(self, remote=False) -> list[str]:
         return [b.strip(" *") for b in self.git("branch", remotes=remote, quiet=True).split("\n")]
 
-    def main_branch_names(self, remote=False) -> List[str]:
+    def main_branch_names(self, remote=False) -> list[str]:
         remote_branches = set(self.all_branches(remote=remote))
         found_branches = [b for b in self.config.protected_branches if b in remote_branches]
         assert len(found_branches) > 0
@@ -187,7 +211,6 @@ class GutsyGit:
     # helpers for complex commands
 
     def add_and_commit(self, message, include_new_files=True, force=False):
-
         if self.is_dirty():
             self.ensure_branch()
             for retry in range(2):  # try twice to automatically deal with pre-commit hooks etc
@@ -230,7 +253,7 @@ class GutsyGit:
 
         except GitCommandError as e:
             if try_pull and ("(fetch first)" in str(e) or "git pull" in str(e)):
-                self.log(f">>> Push failed due to changes in remote, trying to pull", level=LEVEL_HEADER)
+                self.log(">>> Push failed due to changes in remote, trying to pull", level=LEVEL_HEADER)
                 self.pull()
                 self.ensure_push(try_pull=False, open_browser=open_browser)
             else:

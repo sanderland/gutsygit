@@ -1,7 +1,6 @@
 import sys
 
 from gutsygit.client import LEVEL_ERROR, GitCommandError, GutsyGit
-from gutsygit.utils import removeprefix
 
 
 def run():
@@ -48,8 +47,8 @@ def run():
         except GitCommandError as e:
             gg.log(
                 f"!!! Fatal git error while executing '{cmd}':\n",
-                removeprefix(e.stdout.strip(), "stdout: ").strip("'"),  # refactor exc
-                removeprefix(e.stderr.strip(), "stderr: ").strip("'"),
+                e.stdout.strip().removeprefix("stdout: ").strip("'"),  # refactor exc
+                e.stderr.strip().removeprefix("stderr: ").strip("'"),
                 level=LEVEL_ERROR,
             )
             break
