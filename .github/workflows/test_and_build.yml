@@ -37,10 +37,6 @@ jobs:
       run: |
         uv python install ${{ matrix.python-version }}
         echo "python-path=$(uv python find ${{ matrix.python-version }})" >> $GITHUB_OUTPUT
-
-    - name: Install dependencies
-      run: |
-        uv pip install -e ".[dev]"
     
     - name: Lint with ruff
       run: |
@@ -67,16 +63,9 @@ jobs:
       - name: Set up Python
         run: uv python install 3.9
 
-      - name: Update version if specified
-        if: ${{ github.event.inputs.version != '' }}
-        run: |
-          sed -i 's/version = "[^"]*"/version = "${{ github.event.inputs.version }}"/' pyproject.toml
-          echo "Updated version to ${{ github.event.inputs.version }}"
-
       - name: Build package
         run: |
-          uv pip install hatchling
-          uv run hatch build
+          uv run build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
