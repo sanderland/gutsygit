@@ -1,7 +1,6 @@
 import os
 import re
 import webbrowser
-from typing import overload, Literal
 from dataclasses import dataclass
 
 import colorama
