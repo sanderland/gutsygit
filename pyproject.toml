@@ -14,9 +14,6 @@ dependencies = [
     "colorama>=0.4.4",
 ]
 
-[project.urls]
-Repository = "http://github.com/sanderland/gutsygit"
-
 [project.scripts]
 gg = "gutsygit.main:run"
 
