@@ -243,7 +243,7 @@ dependencies = [
     { name = "gitpython" },
 ]
 
-[package.optional-dependencies]
+[package.dev-dependencies]
 dev = [
     { name = "pytest" },
     { name = "ruff" },
@@ -254,11 +254,14 @@ dev = [
 requires-dist = [
     { name = "colorama", specifier = ">=0.4.4" },
     { name = "gitpython", specifier = ">=3" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=6.2.4" },
-    { name = "ruff", marker = "extra == 'dev'" },
-    { name = "twine", marker = "extra == 'dev'", specifier = ">=3.4.1" },
 ]
-provides-extras = ["dev"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest", specifier = ">=6.2.4" },
+    { name = "ruff" },
+    { name = "twine", specifier = ">=3.4.1" },
+]
 
 [[package]]
 name = "id"
