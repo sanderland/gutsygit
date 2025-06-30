@@ -20,7 +20,7 @@ Repository = "http://github.com/sanderland/gutsygit"
 [project.scripts]
 gg = "gutsygit.main:run"
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "pytest>=6.2.4",
     "twine>=3.4.1",
